@@ -24,4 +24,4 @@ class gameGrids {
 		
 		// The class only has a constructor in reality. Nothing else is needed
 		gameGrids(vector<vector<int>>& currentLevel, vector<ofImage>& _voltorb_explosion, vector<ofImage>& _success_animations);
-};ssss
+};
