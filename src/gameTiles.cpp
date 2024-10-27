@@ -1,4 +1,5 @@
 #include "gameTiles.h"
+#include "ofApp.h"
 
 /*
     Author Note:
@@ -84,22 +85,25 @@ void gameTile::setValue(tileType _value) {
     value = _value;
     if (value == VOLTORB) {
         frontOfTile.load("Assets/TileImages/Voltorb.png");
-        flipSound.load("Sounds/sfx/flipSound.mp3");
+        flipSound.load("Sounds/sfx/flipExplosionSound.mp3");
+
     }
     else if (value == ONE) {
         frontOfTile.load("Assets/TileImages/One.png");
         flipSound.load("Sounds/sfx/flipSound.mp3");
+    
     }
     else if (value == TWO) {
         frontOfTile.load("Assets/TileImages/Two.png");
-        flipSound.load("Sounds/sfx/flipExplosionSound.mp3");
+        flipSound.load("Sounds/sfx/flipSound.mp3");
+        
     }
     else if (value == THREE) {
         frontOfTile.load("Assets/TileImages/Three.png");
-        flipSound.load("Sounds/sfx/flipExplosionSound.mp3");
+        flipSound.load("Sounds/sfx/flipSound.mp3");
+
     }
 }
-
 
 
 /*

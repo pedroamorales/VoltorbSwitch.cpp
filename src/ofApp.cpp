@@ -1,4 +1,4 @@
-#include "ofApp.h"
+#include "ofApp.h"   
 
 /*
     Author's Note:
@@ -45,14 +45,14 @@ void ofApp::setup(){
 
 
     font.load("pokemon-ds-font.ttf", 40); 
-    titleFont.load("Silkscreen-Regular.ttf", 100);
-    
+
     ost.setVolume(0.50); // to not make the song too loud
     ost.play(); // this is to make the song play. 
 
     currentPoints = 1; // This is the current points. Since they work by being multiplied, then it's better to start with 1 
 
     pullPointsFromBank(); 
+    updateTitleFont();
 
 }
 
@@ -85,14 +85,41 @@ void ofApp::setupLevel() {
         {3, 1, 0, 0, 1}
     };
 
+    vector<vector<int>> level_4
+    = {
+        {2, 3, 1, 2, 3},
+        {0, 0, 1, 3, 0},
+        {2, 0, 1, 2, 0},
+        {3, 1, 0, 0, 1},
+        {1, 2, 3, 1, 1}
+    };
+
+    vector<vector<int>> level_5
+    = {
+        {1, 2, 2, 0, 1},
+        {1, 2, 0, 1, 3},
+        {0, 0, 1, 3, 0},
+        {3, 1, 0, 0, 1},
+        {2, 0, 1, 2, 0}
+    };
+
 
     levelList.clear();
     gameGrids lvl1 = gameGrids(level_1, success_animations, voltorb_explosion);
     levelList.push_back(lvl1);
-    gameGrids lvl2 = gameGrids(level_2, voltorb_explosion, success_animations);
+    ofRandomize(levelList);
+    gameGrids lvl2 = gameGrids(level_2, success_animations, voltorb_explosion);
     levelList.push_back(lvl2);
+    ofRandomize(levelList);
     gameGrids lvl3 = gameGrids(level_3, success_animations, voltorb_explosion);
     levelList.push_back(lvl3);
+    ofRandomize(levelList);
+    gameGrids lvl4 = gameGrids(level_4, success_animations, voltorb_explosion);
+    levelList.push_back(lvl4);
+    ofRandomize(levelList);
+    gameGrids lvl5 = gameGrids(level_5, success_animations, voltorb_explosion);
+    levelList.push_back(lvl5);
+    ofRandomize(levelList);
 
     // This is to reset all the tiles to be flipped off.
     for (auto& grid : levelList) {
@@ -124,27 +151,29 @@ void ofApp::setupLevel() {
 //--------------------------------------------------------------
 
 // The update method for the game. Update + draw methods are the core loop of the game.
-void ofApp::update(){
-    // If you haven't lost, or haven't won, then keep updating the tiles to keep checking which have been flipped.
+void ofApp::update() {
     if (!victory && !defeat) {
-    for (auto& row : currentTileGrid) {
-        for (auto& tile : row) {
-            if (tile) {
-                tile->update();
+        for (auto& row : currentTileGrid) {
+            for (auto& tile : row) {
+                if (tile) {
+                    tile->update();
+                }
             }
         }
-    }
-    if (checkTimer > 0) {
-        checkTimer--;
-        if (checkTimer == 0) {
+        
+
+
+        if (checkTimer > 0) {
+            checkTimer--;
+            if (checkTimer == 0) {
                 if (checkDefeat()) {
-                    defeat = false;
-                }
+                    defeat = true;
+                    }
                 if (checkVictory()) {
                     levelBeat_sfx.play();
                     victory = true;
                 }
-            canPlay = true;
+                canPlay = true;
             }
         }
     }
@@ -171,13 +200,7 @@ void ofApp::draw(){
         ofSetColor(ofColor::black);
         string pointsStr = to_string(currentPoints);
         string storedPointsStr = to_string(storedPoints);
-
-        // Calculate font size or adjust scaling based on the number of digits
         int maxLength = max(pointsStr.length(), storedPointsStr.length());
-        int adjustedFontSize = 85 - (maxLength * 10);
-
-        // Load or scale font size dynamically
-        titleFont.load("Silkscreen-Regular.ttf", max(adjustedFontSize, 32)); 
 
         // Center or adjust the position of the points text
         float xPosition = ofGetWidth() * 13.5/16 - (maxLength * 10);
@@ -205,19 +228,46 @@ void ofApp::draw(){
         }
     }
 
+    if (defeat) {
+        // Game Over
+        ofSetColor(ofColor::red);
+        font.drawString("Game Over! You hit a Voltorb!", ofGetWidth() * 3 / 4 - 50, ofGetHeight() * 0.8 / 10);
+        font.drawString("Press SPACE to restart", ofGetWidth() * 1 / 4 - 50, ofGetHeight());
+        return; // Exit draw
+    }
+
     if (victory) {
         ofSetBackgroundColor(ofColor::green);
-        font.drawString("Victory! You've won!", ofGetWidth()* 3/4 - 50, ofGetHeight() * 0.8/10);
-        font.drawString("Press space to continue!", ofGetWidth()* 1/4 - 50, ofGetHeight());
+        font.drawString("Victory! You've won!", ofGetWidth() * 3 / 4 - 50, ofGetHeight() * 0.8 / 10);
+        font.drawString("Press SPACE to continue!", ofGetWidth() * 1 / 4 - 50, ofGetHeight());
     }
-    else if (defeat) {
-        pullPointsFromBank();
-        storePointsInBank();
+
+    if (gameFinished) {
+        ofSetBackgroundColor(ofColor::green);
+        font.drawString("Congratulations! ", ofGetWidth() * 3 / 4 - 50, ofGetHeight() * 0.4);
+        font.drawString("You've completed all levels!", ofGetWidth() * 3 / 4 - 50, ofGetHeight() * 0.5);
+        font.drawString("Total Points: " + to_string(currentPoints), ofGetWidth() * 3 / 4 - 50, ofGetHeight() * 0.6);
+        font.drawString("Press ESC to exit.", ofGetWidth() * 3 / 4 - 50, ofGetHeight() * 0.7);
     }
+
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    if (gameFinished && key == OF_KEY_ESC) {
+        ofExit(); // Close the game 
+    }
+    
+    
+    if (defeat && key == ' ') {
+        defeat = false;
+        currentLevel = 0;
+        currentPoints = 1; 
+        currentTileGrid.clear();
+        currentInfoTileGrid.clear();
+        setupLevel();
+    }
+
     if (victory && key == ' ') {
         victory = false;
         if (currentLevel < levelList.size()) {
@@ -231,14 +281,6 @@ void ofApp::keyPressed(int key){
         pointsTallied_sfx.play();
     }
 
-    if (defeat && key == ' ') {
-        defeat = false;
-        currentLevel = 0;
-        currentPoints = 1; 
-        currentTileGrid.clear();
-        currentInfoTileGrid.clear();
-        setupLevel();
-    }
 
     // This is in case you want to toggle the points and rules off to only look at the grid
     if (key == 'R' || key == 'r') {
@@ -274,14 +316,16 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+
     for (unsigned int row = 0; row < currentTileGrid.size(); row++) {
         for (unsigned int col = 0; col < currentTileGrid[row].size(); col++) {
             if (currentTileGrid[row][col]) {
-                if(currentTileGrid[col][row]->mouseHovering(x, y) && button == OF_MOUSE_BUTTON_1 && canPlay) {
+                if(currentTileGrid[row][col]->mouseHovering(x, y) && button == OF_MOUSE_BUTTON_1 && canPlay) {
                     if (!currentTileGrid[row][col]->isFlipped()) {
+                        canPlay = false; // flip is true
                         currentTileGrid[row][col]->startFlip();
-                        updateTileCount(currentTileGrid[col][row]->getValueType());
-                        checkTimer = 20;    //Don't lower this any more. It'll break the game. 
+                        updateTileCount(currentTileGrid[row][col]->getValueType()); // Corrected indices
+                        checkTimer = 20;
                     }
                 }
 
@@ -352,19 +396,18 @@ void ofApp::countTiles() {
 }
 
 void ofApp::updateTileCount(tileType type) {
-    /*
-        Author's note:
-            - This method is to make the count of each tileType go down after you press a tile.
-    */
-    if(tileValueCounts.find(type) != tileValueCounts.end()) {
+    if (tileValueCounts.find(type) != tileValueCounts.end()) {
         if (tileValueCounts[type] > 0) { // to not overshoot into the negatives
             tileValueCounts[type]--;
-            if(int(type) > 1) {
+            
+            // Only multiply if the tile value is TWO or THREE
+            if (type == tileType::TWO || type == tileType::THREE) {
                 pointMult_sfx.play();
+                currentPoints *= (int) type; // multiply the score
             }
-            currentPoints *= (int) type; //multiply the score
-        }
 
+            updateTitleFont();
+        }
     }
 }
 
@@ -382,15 +425,22 @@ bool ofApp::checkVictory() {
 bool ofApp::checkDefeat() {
     for (unsigned int i = 0; i < currentTileGrid.size(); i++) {
         for (unsigned int j = 0; j < currentTileGrid[i].size(); j++) {
-            if (currentTileGrid[i][j]) {
+            if (currentTileGrid[i][j] && currentTileGrid[i][j]->isFlipped()) {
                 if (currentTileGrid[i][j]->getValue() == tileType::VOLTORB) {
-                    if (currentTileGrid[i][j]->isFlipped()) {
-                        return true;
-                    }
+                    return true; // it will only return true if Voltorb is flipped
                 }
             }
         }
     }
     return false;
+}
+
+void ofApp::updateTitleFont(){
+    // Calculate font size or adjust scaling based on the number of digits
+    int maxLength = max(to_string(currentPoints).length(), to_string(storedPoints).length());
+    int adjustedFontSize = 85 - (maxLength * 10);
+
+    // Load or scale font size dynamically
+    titleFont.load("Silkscreen-Regular.ttf", max(adjustedFontSize, 32)); 
 }
 

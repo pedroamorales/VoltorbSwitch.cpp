@@ -6,7 +6,7 @@
         - I left you many comments to help you understand the code.
 */
 
-gameGrids::gameGrids(vector<vector<int>>& currentLevel, vector<ofImage>& _voltorb_explosion, vector<ofImage>& _success_animations) {
+gameGrids::gameGrids(vector<vector<int>>& currentLevel, vector<ofImage>& _success_animations, vector<ofImage>& _voltorb_explosion) {
     int gridSize = 5;
     int rows = gridSize + 1; // offset by 1 to accommodate the info tiles
     int cols = gridSize + 1; // offset by 1 to accommodate the info tiles
@@ -41,16 +41,39 @@ gameGrids::gameGrids(vector<vector<int>>& currentLevel, vector<ofImage>& _voltor
                 
                 if (row == gridSize) {
                     infoTileGrid[row][col]->markColOn(); // this is to know if it should count the columns
-                    
-                    infoTileGrid[row][col]->setColor(ofColor(255,209,209));
+
+                    // Set color based on column
+                    if (col == 0) {
+                        infoTileGrid[row][col]->setColor(ofColor(255, 130, 90)); // Red
+                    } else if (col == 1) {
+                        infoTileGrid[row][col]->setColor(ofColor(70, 170, 70)); // Green
+                    } else if (col == 2) {
+                        infoTileGrid[row][col]->setColor(ofColor(255, 165,50)); // Orange
+                    } else if (col == 3) {
+                        infoTileGrid[row][col]->setColor(ofColor(100, 150, 230)); // Blue
+                    } else if (col == 4) {
+                        infoTileGrid[row][col]->setColor(ofColor(190, 120, 200)); // Purple
+                    }
                 }
                 // else we count the rows
                 else {
                     cout << "Marking col: " << col << endl;
                     infoTileGrid[row][col]->markRowOn();
 
-                    infoTileGrid[row][col]->setColor(ofColor(255,252,215));
+                    // Set color based on row
+                    if (row == 0) {
+                        infoTileGrid[row][col]->setColor(ofColor(255, 130, 90)); // Red
+                    } else if (row == 1) {
+                        infoTileGrid[row][col]->setColor(ofColor(70, 170, 70)); // Green
+                    } else if (row == 2) {
+                        infoTileGrid[row][col]->setColor(ofColor(255, 165, 50)); // Orange
+                    } else if (row == 3) {
+                        infoTileGrid[row][col]->setColor(ofColor(100, 150, 230)); // Blue
+                    } else if (row == 4) {
+                        infoTileGrid[row][col]->setColor(ofColor(190, 120, 200)); // Purple
+                    }
                 }
+
                 //Make the infoTile count up the points in its respective column/row
                 infoTileGrid[row][col]->countPoints(tileGrid);
     
@@ -70,7 +93,7 @@ gameGrids::gameGrids(vector<vector<int>>& currentLevel, vector<ofImage>& _voltor
                 } 
                 else if (currentLevel[row][col] == 2) {
                     tileGrid[row][col]->setValue(tileType::TWO);
-                    tileGrid[row][col]->setAnimation(_voltorb_explosion);
+                    tileGrid[row][col]->setAnimation(_success_animations);
                 } 
                 else if (currentLevel[row][col] == 3) {
                     tileGrid[row][col]->setValue(tileType::THREE);

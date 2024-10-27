@@ -57,7 +57,8 @@ class ofApp : public ofBaseApp{
 		}
 
 
-	// These are going to be for the levels themselves. Each GameGrid contains a 5x5 grid of GameTiles & 1 InfoTile per row AND column.
+	// These are going to be for the levels themselves. Each GameGrid contains a 5x5 grid of GameTiles & 1 InfoTile per row AND column.s
+
 		vector<gameGrids> levelList;
 		vector<vector<shared_ptr<gameTile>>> currentTileGrid; 
 		vector<vector<shared_ptr<infoTile>>> currentInfoTileGrid;
@@ -95,6 +96,7 @@ class ofApp : public ofBaseApp{
 
 		void countTiles();
 		void updateTileCount(tileType type);
+		void updateTitleFont();
 
 		int checkTimer = 0;
 
@@ -106,6 +108,7 @@ class ofApp : public ofBaseApp{
 
 	//Boolean to make sure enough time passes before the next tile can be flipped
 		bool canPlay = true;
+		bool isFlipping = false;
 };
 
 
