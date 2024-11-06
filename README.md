@@ -1,4 +1,4 @@
-## Voltorb Switch MiniGame
+# Voltorb Switch MiniGame
 1. This project is based on the Voltorb Switch mini game from Pokemon DSi games.
 
 ## Setup
